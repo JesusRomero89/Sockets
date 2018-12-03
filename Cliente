@@ -1,0 +1,176 @@
+package pevalSockets;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Scanner;
+
+/**
+ * Clase Cliente, que ejecuta un nuevo cliente y se conecta a la clase Servidor
+ * a través de un Thread
+ * 
+ * @author Jesús Romero González
+ * @version 29/11/2018
+ */
+public class Cliente {
+	/** PUERTO <int> puerto por defecto para el socket */
+	private final int PUERTO = 5000;
+	/** socket <Socket> socket para la conexión del cliente */
+	private Socket socket;
+	/** mensaje <String> mensaje del cliente hacia el servidor */
+	private String mensaje;
+	/** salida <DataOutputStream> flujo de salida hacia el servidor */
+	private DataOutputStream salida;
+	/** entrada <DataInputStream> flujo de entrada desde el servidor */
+	private DataInputStream entrada;
+	/** oEntrada <ObjectInputStream> flujo de entrada desde el servidor */
+	private ObjectInputStream oEntrada;
+
+	/**
+	 * Método initCliente en el que creamos un nuevo socket hacia el cliente,
+	 * preguntamos si es coductor o corredor de seguros, y damos un mensaje de
+	 * bienvenida
+	 */
+	public void initClient() {
+		try {
+			/** Creamos el socket */
+			try {
+				this.socket = new Socket("localhost", this.PUERTO);
+			} catch (Exception e) {
+				System.out.println("\t**ERROR CONEXION**");
+			}
+			/** Sout "¿Eres conductor o corredor de seguros? c|s" */
+			this.entrada = new DataInputStream(socket.getInputStream());
+			System.out.println(this.entrada.readUTF());
+
+			/** Sout "--> " */
+			this.entrada = new DataInputStream(socket.getInputStream());
+			System.out.print(this.entrada.readUTF());
+
+			/** Envío de la opción introducida */
+			this.mensaje = new Scanner(System.in).nextLine().toLowerCase();
+			this.salida = new DataOutputStream(this.socket.getOutputStream());
+			this.salida.writeUTF(this.mensaje);
+
+			switch (mensaje) {
+			case "c":
+				envioDatosCliente(socket);
+				break;
+			case "s":
+				operacionesSeguro(socket);
+				break;
+			}
+		} catch (IOException e) {
+//			e.printStackTrace();
+			System.out.println("\t**ERROR E/S DATOS**");
+		}
+	}
+
+	/**
+	 * Método envioDatosCliente en el que enviamos datos del cliente hacia el
+	 * servidor a través del hilo
+	 * 
+	 * @param socket <Socket> socket hacia el servidor
+	 */
+	public void envioDatosCliente(Socket socket) {
+		try {
+			/** Leer mensaje personalizado */
+			this.entrada = new DataInputStream(this.socket.getInputStream());
+			System.out.println(this.entrada.readUTF());
+
+			/** Sout "NUEVA POLIZA" */
+			this.entrada = new DataInputStream(socket.getInputStream());
+			System.out.println(this.entrada.readUTF());
+
+			/** Sout "Nº POLIZA" */
+			this.entrada = new DataInputStream(socket.getInputStream());
+			System.out.print(this.entrada.readUTF());
+
+			/** Enviamos el nº póliza */
+			this.mensaje = new Scanner(System.in).nextLine();
+			this.salida = new DataOutputStream(socket.getOutputStream());
+			this.salida.writeUTF(this.mensaje);
+
+			/** Sout "INTRODUCE DATOS DEL CONDUCTOR" */
+			this.entrada = new DataInputStream(socket.getInputStream());
+			System.out.println(this.entrada.readUTF());
+
+			/** Sout "DNI:" */
+			this.entrada = new DataInputStream(socket.getInputStream());
+			System.out.print(this.entrada.readUTF());
+
+			/** Enviamos el DNI */
+			this.mensaje = new Scanner(System.in).nextLine();
+			this.salida.writeUTF(this.mensaje);
+
+			/** Sout "NOMBRE:" */
+			this.entrada = new DataInputStream(socket.getInputStream());
+			System.out.print(this.entrada.readUTF());
+
+			/** Enviamos el nombre */
+			this.mensaje = new Scanner(System.in).nextLine();
+			this.salida.writeUTF(this.mensaje);
+
+			/** Sout "MATRICULA:" */
+			this.entrada = new DataInputStream(socket.getInputStream());
+			System.out.print(this.entrada.readUTF());
+
+			/** Enviamos la matrícula */
+			this.mensaje = new Scanner(System.in).nextLine();
+			this.salida.writeUTF(this.mensaje);
+
+			/** Sout "DESCRIPCION:" */
+			this.entrada = new DataInputStream(socket.getInputStream());
+			System.out.print(this.entrada.readUTF());
+
+			/** Enviamos la descripción */
+			this.mensaje = new Scanner(System.in).nextLine();
+			this.salida.writeUTF(this.mensaje);
+
+		} catch (Exception e) {
+//			e.printStackTrace();
+			System.out.println("\t**ERROR E/S DATOS**");
+		}
+	}
+
+	/**
+	 * Método operacionesSeguro en el que recibimos del servidor un Hashmap con los
+	 * datos de los clientes y los siniestros
+	 * 
+	 * @param socket <Socket> socket desde el servidor
+	 */
+	public void operacionesSeguro(Socket socket) {
+		try {
+			/** Leer mensaje personalizado */
+			this.entrada = new DataInputStream(this.socket.getInputStream());
+			System.out.println(this.entrada.readUTF());
+
+			/** recibimos el hashmap a través del socket */
+			oEntrada = new ObjectInputStream(socket.getInputStream());
+		} catch (Exception e) {
+//			e.printStackTrace();
+			System.out.println("\t**ERROR E/S DATOS**");
+		}
+		try {
+			/** recorremos el hashmap y mostramos su contenido */
+			((HashMap<Integer, Conductores>) oEntrada.readObject())
+					.forEach((k, v) -> System.out.println(v.toString() + "\n"));
+		} catch (Exception e) {
+//			e.printStackTrace();
+			System.out.println("\t**ERROR CLASE NO ENCONTRADA");
+		}
+	}
+
+	/**
+	 * Método principal en el que creamos una nueva instancia de la clase Cliente
+	 * 
+	 * @param args
+	 */
+	public static void main(String args[]) {
+		Cliente c = new Cliente();
+		c.initClient();
+	}
+}
