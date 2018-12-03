@@ -1,0 +1,86 @@
+package pevalSockets;
+
+import java.io.Serializable;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.HashMap;
+
+/**
+ * Clase Servidor, que crea un nuevo hilo con el socket para la conxión entre
+ * cliente y servidor
+ * 
+ * @author Jesús Romero González
+ * @version 29/11/2018
+ *
+ */
+public class Servidor implements Serializable {
+	/**
+	 * 
+	 */
+	private final long serialVersionUID = 1L;
+	/*
+	 * mapConductores <HashMap> contiene los datos del cliente y su respectivo
+	 * siniestro
+	 */
+	private static HashMap<Integer, Conductores> mapConductores = new HashMap<>();
+
+	/**
+	 * Método initServer en el cual arrancamos una nueva instancia del servidor
+	 */
+	public void initServer() {
+		Servidor s = new Servidor();
+		s.initServer();
+		System.out.println("\t**SERVIDOR INICIADO**\n");
+	}
+
+	/**
+	 * Constructor
+	 */
+	public Servidor() {
+	}
+
+	/**
+	 * Método principal en el que arrancamos el servidor y lo ponemos a la espera de
+	 * que se conecte un cliente, cuando este lo hace, creamos un hilo con la
+	 * conexión entre cliente y servidor.
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		try {
+			/** creamos nuevo socket */
+			final int PUERTO = 5000;
+			ServerSocket ss = new ServerSocket(PUERTO);
+			Socket st = new Socket();
+
+			System.out.println("\t**ESPERANDO CONEXIÓN**\n");
+			/** aceptamos todas las conexiónes y creamos un nuevo hilo */
+			while (true) {
+				st = ss.accept();
+				HiloServidor hilo = new HiloServidor(st);
+				hilo.start();
+			}
+		} catch (Exception e) {
+//			e.printStackTrace();
+			System.out.println("\t**ERROR CONEXION**");
+		}
+	}
+
+	/**
+	 * Método Get mapConductores
+	 * 
+	 * @return mapConductores <HasMap>
+	 */
+	public HashMap<Integer, Conductores> getMapConductores() {
+		return mapConductores;
+	}
+
+	/**
+	 * Método Set mapConductores
+	 * 
+	 * @param mapConductores <HasMap>
+	 */
+	public void setMapConductores(HashMap<Integer, Conductores> mapConductores) {
+		this.mapConductores = mapConductores;
+	}
+}
