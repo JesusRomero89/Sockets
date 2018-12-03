@@ -1,0 +1,111 @@
+package pevalSockets;
+
+import java.io.Serializable;
+
+/**
+ * Clase Conductores, en la que definimos los atributos de los clientes
+ * 
+ * @author Jesú Romero González
+ * @version 29/11/2018
+ */
+public class Conductores implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/** dni <String> dni del cliente */
+	private String dni;
+	/** nombre <String> nombre del cliente */
+	private String nombre;
+	/** matricula <String> matrícula del vehículo */
+	private String matricula;
+	/** poliza <String> poliza del seguro */
+	private String poliza;
+	/** numSiniestro <int> intoincrement identificativo del siniestro */
+	private int numSinisestro;
+	/** descripcion <String> descripción del siniestro */
+	private String descripcion;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param dni       <String>
+	 * @param nombre    <String>
+	 * @param matricula <String>
+	 * @param poliza    <String>
+	 * @param num       <int>
+	 * @param desc      <String>
+	 */
+	public Conductores(String dni, String nombre, String matricula, String poliza, int num, String desc) {
+		this.dni = dni;
+		this.nombre = nombre;
+		this.matricula = matricula;
+		this.poliza = poliza;
+		this.numSinisestro = num;
+		this.descripcion = desc;
+	}
+
+	/**
+	 * Método getDni
+	 * 
+	 * @return dni <String>
+	 */
+	public String getDni() {
+		return dni;
+	}
+
+	/**
+	 * Método getNombre
+	 * 
+	 * @return nombre <String>
+	 */
+	public String getNombre() {
+		return nombre;
+	}
+
+	/**
+	 * Método getMatricula
+	 * 
+	 * @return matricula <Srtring>
+	 */
+	public String getMatricula() {
+		return matricula;
+	}
+
+	/**
+	 * Método getPoliza
+	 * 
+	 * @return poliza <String>
+	 */
+	public String getPoliza() {
+		return poliza;
+	}
+
+	/**
+	 * Método getNumSiniestro
+	 * 
+	 * @return numSiniestro <int>
+	 */
+	public int getNumSinisestro() {
+		return numSinisestro;
+	}
+
+	/**
+	 * Método getDescripcion
+	 * 
+	 * @return descripcion <String>
+	 */
+	public String getDescripcion() {
+		return descripcion;
+	}
+
+	@Override
+	/**
+	 * Médo toString
+	 */
+	public String toString() {
+		return "DNI: " + dni.toString() + "\nNOMBRE: " + nombre.toString() + "\nMATRICULA: " + matricula.toString()
+				+ "\nNº POLIZA: " + poliza.toString() + "\nNº SINIESTRO: " + numSinisestro + "\nDESCRIPCION: "
+				+ descripcion.toString();
+	}
+}
