@@ -1,0 +1,156 @@
+package pevalSockets;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+
+/**
+ * Clase HiloServidor, hilo que contiene la conexión cliente / servidor, y que
+ * realiza operaciones de lectura y escritura de datos entre estos
+ * 
+ * @author Jesús Romero González
+ * @version 29/11/2018
+ * @see Servidor
+ */
+public class HiloServidor extends Thread {
+	/** dataEntrada <DataInputStream> flujo de entrada desde el cliente */
+	private DataInputStream dataEntrada;
+	/** dataSalida <DataOutputStream> flujo de salida hacia el cliente */
+	private DataOutputStream dataSalida;
+	/** objectSalida <ObjectOutputStream> flujo de salida hacia el cliente */
+	private ObjectOutputStream objectSalida;
+	/** contadorConductores <int> contador de conductores conectados */
+	private static int contadorConductores;
+	/** socket <Socket> socket de conexión del servidor */
+	private Socket socket = null;
+	/** mensajeEntrada <String> mensaje del cliente al servidor */
+	private String mensajeEntrada;
+	/** mensajeSalida <String> mensaje del servidor hacia el cliente */
+	private String mensajeSalida = null;
+	/** serv <Servidor> objeto de la clase Servidor */
+	private Servidor serv = new Servidor();
+
+	/**
+	 * Constructor
+	 * 
+	 * @param s <Socket> socket hacia el cliente
+	 */
+	public HiloServidor(Socket s) {
+		socket = s;
+	}
+
+	/**
+	 * Método leerDatosCliente en el que leemos los datos recibidos del cliente
+	 * 
+	 * @param socket <Socket> socket hacia el cliente
+	 */
+	public synchronized void leerDatosCliente(Socket socket) {
+		try {
+			/** aumentamos nº de conductores */
+			contadorConductores++;
+			/** mandamos mensaje */
+			mensajeSalida = "\t**CONECTADO CONDUCTOR Nº: " + contadorConductores + "**\n";
+			dataSalida.writeUTF(mensajeSalida);
+			/** mandamos mensaje */
+			mensajeSalida = "NUEVA POLIZA\n";
+			dataSalida.writeUTF(mensajeSalida);
+			/** mandamos mensaje */
+			mensajeSalida = "Nº POLIZA: ";
+			dataSalida.writeUTF(mensajeSalida);
+			/** leemos nº de póliza introducida por el cliente */
+			dataEntrada = new DataInputStream(socket.getInputStream());
+			String numPoliza = dataEntrada.readUTF();
+			/** mandamos mensaje */
+			mensajeSalida = "INTRODUCE DATOS DEL CONDUCTOR";
+			dataSalida.writeUTF(mensajeSalida);
+			/** mandamos mensaje */
+			mensajeSalida = ("DNI: ");
+			dataSalida.writeUTF(mensajeSalida);
+			/** leemos dni introducido por el cliente */
+			String dni = dataEntrada.readUTF();
+			/** mandamos mensaje */
+			mensajeSalida = ("NOMBRE: ");
+			dataSalida.writeUTF(mensajeSalida);
+			/** leemos nombre introducido por el cliente */
+			String nombre = dataEntrada.readUTF();
+			/** mandamos mensaje */
+			mensajeSalida = ("MATRICULA: ");
+			dataSalida.writeUTF(mensajeSalida);
+			/** leemos matrícula introducido por el cliente */
+			String matricula = dataEntrada.readUTF();
+			/** mandamos mensaje */
+			mensajeSalida = ("DESCRIBA EL ACCIDENTE: ");
+			dataSalida.writeUTF(mensajeSalida);
+			/** leemos descripción del siniestro introducida por el cliente */
+			String descripcion = dataEntrada.readUTF();
+			/*
+			 * accedemos al hashmap de la clase Servidor y le añadimos un nuevo conductor
+			 * con key contadorConductores
+			 */
+			serv.getMapConductores().put(contadorConductores,
+					new Conductores(dni, nombre, matricula, "POL" + numPoliza, contadorConductores, descripcion));
+			/* mostramos registros introducidos en el hashmap */
+			System.out.println(serv.getMapConductores().get(contadorConductores));
+		} catch (Exception e) {
+//			e.printStackTrace();
+			System.out.println("\t**ERROR E/S DATOS");
+		}
+	}
+
+	/**
+	 * Método envioDatosSiniestros en el que mandamos al cliente el hashmap de la
+	 * clase Servidor
+	 * 
+	 * @param socket <Socket> socket hacia el cliente
+	 */
+	public synchronized void envioDatosSiniestros(Socket socket) {
+		try {
+			/** mandamos mensaje */
+			mensajeSalida = "\t**CONECTADO CORREDOR DE SEGUROS**\n";
+			dataSalida.writeUTF(mensajeSalida);
+			/** rescatamos el hashmap de la clase Servidor a través del get del hashmap */
+			objectSalida = new ObjectOutputStream(socket.getOutputStream());
+			objectSalida.writeObject(serv.getMapConductores());
+		} catch (Exception e) {
+//			e.printStackTrace();
+			System.out.println("\t**ERROR E/S DATOS");
+		}
+	}
+
+	/**
+	 * Método run que ejecutará los métodos leerDatosCliente ó envioDatosSiniestros
+	 * en función de la persona que se conecte
+	 */
+	public synchronized void run() {
+		try {
+			/** inicializamos los flujos de entrada / salida */
+			dataEntrada = new DataInputStream(socket.getInputStream());
+			dataSalida = new DataOutputStream(socket.getOutputStream());
+
+			System.out.println("\t**CLIENTE CONECTADO**");
+			/** enviamos mensaje */
+			mensajeSalida = "¿Eres conductor o corredor de seguros? c | s";
+			dataSalida.writeUTF(mensajeSalida);
+			mensajeSalida = "--> ";
+			dataSalida.writeUTF(mensajeSalida);
+
+			/** leemos opción introducida por el cliente */
+			mensajeEntrada = dataEntrada.readUTF();
+
+			System.out.println("Opción introducida: " + mensajeEntrada);
+
+			switch (mensajeEntrada) {
+			case "c":
+				leerDatosCliente(socket);
+				break;
+			case "s":
+				envioDatosSiniestros(socket);
+				break;
+			}
+		} catch (Exception e) {
+//			e.printStackTrace();
+			System.out.println("\t**ERROR E/S DATOS");
+		}
+	}
+}
